@@ -2,7 +2,9 @@ package mx.com.bitacora.model;
 
 import jakarta.annotation.Nullable;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -11,6 +13,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Entity
 @Table(name = "BT_USUARIOS")
+@Builder
 public class Usuario {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -18,9 +21,11 @@ public class Usuario {
     private Long idUsuario;
 
     @Column
+    @NotBlank(message = "Please add nombre")
     private String nombre;
 
     @Column
+    @NotBlank(message = "Please add apellidoPaterno")
     private String apellidoPaterno;
 
     private String apellidoMaterno;
@@ -29,11 +34,9 @@ public class Usuario {
     private String email;
 
     @Column
-    @Nullable
     private String createdAt;
 
     @Column
-    @Nullable
     private String updatedAt;
 
     @Column

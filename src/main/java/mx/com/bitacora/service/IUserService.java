@@ -1,5 +1,6 @@
 package mx.com.bitacora.service;
 
+import mx.com.bitacora.model.GenericResponse;
 import mx.com.bitacora.model.Usuario;
 import org.springframework.http.ResponseEntity;
 
@@ -7,13 +8,17 @@ import java.util.List;
 
 public interface IUserService {
 
-    ResponseEntity<Object> insertUser(Usuario input);
+    GenericResponse<Usuario> insertUser(Usuario input);
 
-    List<Usuario> getUsers();
+    List<Usuario> listUsers();
 
-    ResponseEntity<Object> updateUser(Usuario input);
+    GenericResponse<List<Usuario>> getListUsers();
 
-    ResponseEntity<Object> deleteUser(Long id);
+    GenericResponse<Usuario> updateUser(Long id, Usuario input);
 
-    ResponseEntity<Object> getUserById(Long id);
+    GenericResponse<Usuario> deleteUser(Long id);
+
+    GenericResponse<Usuario> getUserById(Long id);
+
+    GenericResponse<Usuario> login(String email);
 }

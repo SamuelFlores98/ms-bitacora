@@ -1,5 +1,7 @@
 package mx.com.bitacora.service;
 
+import mx.com.bitacora.exception.UserNotFoundException;
+import mx.com.bitacora.model.GenericResponse;
 import mx.com.bitacora.model.Usuario;
 import mx.com.bitacora.repository.UserRepository;
 import mx.com.bitacora.utils.Constants;
@@ -24,76 +26,67 @@ public class UserServiceImpl implements IUserService{
     }
     
     @Override
-    public ResponseEntity<Object> insertUser(Usuario input) {
+    public GenericResponse<Usuario> insertUser(Usuario input) {
         Optional<Usuario> email = this.repository.findUserByEmail(input.getEmail());
         if (email.isEmpty()){
             input.setCreatedAt(String.valueOf(LocalDate.now()));
-            return new ResponseEntity<>(this.repository.save(input), HttpStatus.CREATED);
+            return new GenericResponse<>(HttpStatus.CREATED, this.repository.save(input),
+                    true, "Usuario Creado");
+            //return new ResponseEntity<>(this.repository.save(input), HttpStatus.CREATED);
         }
         List<String> errors = new ArrayList<>();
         errors.add(Constants.EMAIL_DUPLICADO);
 
-        return new ResponseEntity<>(errors, HttpStatus.CONFLICT);
+        return new GenericResponse<>(HttpStatus.CONFLICT, null, false, Constants.EMAIL_DUPLICADO);
+        //return new ResponseEntity<>(errors, HttpStatus.CONFLICT);
     }
 
     @Override
-    public List<Usuario> getUsers() {
+    public List<Usuario> listUsers() {
         return this.repository.findAll();
     }
 
     @Override
-    public ResponseEntity<Object> updateUser(Usuario input) {
-        Optional<Usuario> userExist = this.repository.findById(input.getIdUsuario());
-        if (userExist.isPresent()) {
-            if (!input.getEmail().equals(userExist.get().getEmail())) {
-                Optional<Usuario> email = this.repository.findUserByEmail(input.getEmail());
-                if (email.isPresent()){
-                    Object[] error = {"Email existente"};
-                    return new ResponseEntity<>(error, HttpStatus.CONFLICT);
-                }
-            }
-
-            Usuario user = setUserUpdate(userExist.get(), input);
-
-            return new ResponseEntity<>(this.repository.save(user), HttpStatus.OK);
-        }
-        Object[] error = {"Usuario no existe"};
-        return new ResponseEntity<>(error, HttpStatus.CONFLICT);
+    public GenericResponse<List<Usuario>> getListUsers() {
+        List<Usuario> usuarios = this.repository.findAll();
+        return new GenericResponse<>(HttpStatus.OK, usuarios, true, "Listado Exitoso");
     }
 
     @Override
-    public ResponseEntity<Object> deleteUser(Long id) {
+    public GenericResponse<Usuario> updateUser(Long id, Usuario input) {
+        Optional<Usuario> userExist = this.repository.findById(id);
+        if (userExist.isPresent()) {
+            userExist.get().setNombre(input.getNombre());
+            userExist.get().setApellidoPaterno(input.getApellidoPaterno());
+            userExist.get().setApellidoMaterno(input.getApellidoMaterno());
+            userExist.get().setUpdatedAt(String.valueOf(LocalDate.now()));
+            return new GenericResponse<>(HttpStatus.OK, this.repository.save(userExist.get()), true, "Actualizacion Exitosa");
+        }
+        return new GenericResponse<>(HttpStatus.NOT_FOUND, null, false, Constants.USUARIO_INEXISTENTE);
+    }
+
+    @Override
+    public GenericResponse<Usuario> deleteUser(Long id){
         boolean userExist = this.repository.existsById(id);
         if (!userExist) {
-            Object[] error = {"Usuario no existe"};
-            return new ResponseEntity<>(error, HttpStatus.CONFLICT);
+            return new GenericResponse<>(HttpStatus.NOT_FOUND, null, false, Constants.USUARIO_INEXISTENTE);
         }
         this.repository.deleteById(id);
-        Object[] response = {"Usuario eliminado"};
-        return new ResponseEntity<>(response, HttpStatus.OK);
+        return new GenericResponse<>(HttpStatus.OK, null, true, "Usuario Eliminado");
     }
 
     @Override
-    public ResponseEntity<Object> getUserById(Long id) {
+    public GenericResponse<Usuario> getUserById(Long id){
         Optional<Usuario> user = this.repository.findById(id);
-        if (user.isEmpty()) {
-            Object[] error = {"Usuario no existe"};
-            return new ResponseEntity<>(error, HttpStatus.CONFLICT);
-        }
-        return new ResponseEntity<>(user.get(), HttpStatus.OK);
+        return user.map(usuario -> new GenericResponse<>(HttpStatus.OK, usuario, true, "Consulta Exitosa"))
+                .orElseGet(() -> new GenericResponse<>(HttpStatus.NOT_FOUND, null, false, Constants.USUARIO_INEXISTENTE));
     }
 
-
-    public Usuario setUserUpdate (Usuario userExist, Usuario input) {
-        Usuario user = new Usuario();
-        user.setIdUsuario(userExist.getIdUsuario());
-        user.setNombre(null == input.getNombre() ? userExist.getNombre() : input.getNombre());
-        user.setApellidoPaterno(null == input.getApellidoPaterno() ? userExist.getApellidoPaterno() : input.getApellidoPaterno());
-        user.setApellidoMaterno(null == input.getApellidoMaterno() ? userExist.getApellidoMaterno() : input.getApellidoMaterno());
-        user.setEmail(null == input.getEmail() ? userExist.getEmail() : input.getEmail());
-        user.setCreatedAt(userExist.getCreatedAt());
-        user.setUpdatedAt(String.valueOf(LocalDate.now()));
-        user.setIdRol(userExist.getIdRol());
-        return user;
+    @Override
+    public GenericResponse<Usuario> login(String email) {
+        Optional<Usuario> user = this.repository.findUserByEmail(email);
+        return user.map(usuario -> new GenericResponse<>(HttpStatus.OK, usuario, true, "Login Exitoso"))
+                .orElseGet(() ->
+                        new GenericResponse<>(HttpStatus.NOT_FOUND, null, false, Constants.USUARIO_INEXISTENTE));
     }
 }

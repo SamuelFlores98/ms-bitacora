@@ -1,5 +1,7 @@
 package mx.com.bitacora.controller;
 
+import jakarta.validation.Valid;
+import mx.com.bitacora.exception.UserNotFoundException;
 import mx.com.bitacora.model.Usuario;
 import mx.com.bitacora.service.IUserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,19 +23,24 @@ public class UserController {
     }
 
     @GetMapping("getUsers")
-    public ResponseEntity<List<Usuario>> listaUsuarios(){
-        List<Usuario> listUsers = userService.getUsers();
+    public ResponseEntity<List<Usuario>> getUsers(){
+        List<Usuario> listUsers = userService.listUsers();
         return new ResponseEntity<>(listUsers, HttpStatus.OK);
     }
 
+    @GetMapping("listUsers")
+    public ResponseEntity<Object> listUsuarios(){
+        return new ResponseEntity<>(this.userService.getListUsers(), HttpStatus.OK);
+    }
+
     @PostMapping("createUser")
-    public ResponseEntity<Object> insertarUsuario(@RequestBody Usuario user){
+    public ResponseEntity<Object> insertarUsuario(@Valid @RequestBody Usuario user){
         return new ResponseEntity<>(this.userService.insertUser(user), HttpStatus.OK);
     }
 
-    @PutMapping("updateUser")
-    public ResponseEntity<Object> actualizarUsuario(@RequestBody Usuario user) {
-        return new ResponseEntity<>(this.userService.updateUser(user), HttpStatus.OK);
+    @PutMapping("updateUser/{id}")
+    public ResponseEntity<Object> actualizarUsuario(@PathVariable Long id, @RequestBody Usuario user) {
+        return new ResponseEntity<>(this.userService.updateUser(id, user), HttpStatus.OK);
     }
 
     @DeleteMapping("deleteUser/{id}")
