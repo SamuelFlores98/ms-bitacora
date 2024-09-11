@@ -13,7 +13,9 @@ public class Proyecto {
     @Column
     private Integer idProyecto;
 
+    @Column
     private String nombreProyecto;
 
+    @Column
     private String claveProyecto;
 }

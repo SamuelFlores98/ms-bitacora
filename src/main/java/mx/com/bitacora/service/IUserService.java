@@ -1,10 +1,15 @@
 package mx.com.bitacora.service;
 
+import jakarta.servlet.http.HttpServletResponse;
 import mx.com.bitacora.model.GenericResponse;
 import mx.com.bitacora.model.Usuario;
-import org.springframework.http.ResponseEntity;
+import org.supercsv.io.ICsvBeanWriter;
 
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.Writer;
 import java.util.List;
+import java.util.Map;
 
 public interface IUserService {
 
@@ -21,4 +26,10 @@ public interface IUserService {
     GenericResponse<Usuario> getUserById(Long id);
 
     GenericResponse<Usuario> login(String email);
+
+    GenericResponse<Map<String, Object>> exportUsers();
+
+    ByteArrayInputStream exportAllUsers();
+
+    ICsvBeanWriter exportCsv(Writer writer) throws IOException;
 }

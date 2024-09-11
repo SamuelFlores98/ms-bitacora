@@ -1,6 +1,5 @@
 package mx.com.bitacora.model;
 
-import jakarta.annotation.Nullable;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
@@ -28,6 +27,7 @@ public class Usuario {
     @NotBlank(message = "Please add apellidoPaterno")
     private String apellidoPaterno;
 
+    @Column
     private String apellidoMaterno;
 
     @Column(unique = true)
